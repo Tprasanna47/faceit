@@ -1,0 +1,39 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FaceIT</title>
+  <style>
+      .img-container
+      {
+           display: flex;
+           justify-content: center;
+
+      }
+    img
+    {
+
+    height:15rem;
+    width:15rem;
+    border:2px solid red;
+    }
+
+  </style>
+</head>
+<body>
+
+
+
+
+<H2 align="center" >Live Streaming of Camera</H2>
+
+<div class="img-container">
+
+    <img src="{{url_for('video') }}">
+</div>
+
+</body>
+</html>
