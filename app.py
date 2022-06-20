@@ -13,11 +13,9 @@ from firebase_admin import firestore
 # from firebase_admin import credentials
 
 
-cred = credentials.Certificate("faceit-2f784-firebase-adminsdk-5z8za-fe87f32d59.json")
-firebase_admin.initialize_app(cred)
-
-
-db=firestore.client()
+# cred = credentials.Certificate("faceit-2f784-firebase-adminsdk-5z8za-fe87f32d59.json")
+# firebase_admin.initialize_app(cred)
+# db=firestore.client()
 path='training'
 images=[]
 classnames=[]
@@ -70,7 +68,7 @@ def markattendance(name):
          now = datetime.datetime.now()
          dtstring = now.strftime('%H:%M:%S')
          f.writelines(f'\n{name},{dtstring}')
-         db.collection(f'{todays}').add({f'Name': f'{name}', 'Time': f'{dtstring}'})
+#          db.collection(f'{todays}').add({f'Name': f'{name}', 'Time': f'{dtstring}'})
 
 
 app = Flask(__name__)
