@@ -32,8 +32,18 @@
 
 <div class="img-container">
 
-    <img src="{{url_for('video') }}">
+    <form action="{{url_for('video')}}" method="post">
+
+        <input type="radio" name="turn" id="on" value="yes">
+        <input type="radio" name="turn" id="off" value="no">
+        <input type="submit" value="">
+    </form>
+    
 </div>
+
+
+<a href="{{url_for('second')}}">click here</a>
+
 
 </body>
 </html>
