@@ -1,4 +1,4 @@
-from flask import Flask, render_template, Response
+from flask import *
 import cv2
 import face_recognition
 import numpy
@@ -9,13 +9,14 @@ import firebase_admin
 from firebase_admin import credentials
 from firebase_admin import db
 from firebase_admin import firestore
-# import firebase_admin
-# from firebase_admin import credentials
+import firebase_admin
+from firebase_admin import credentials
+
+cred = credentials.Certificate("faceit-2f784-firebase-adminsdk-5z8za-fe87f32d59.json")
+firebase_admin.initialize_app(cred)
+db=firestore.client()
 
 
-# cred = credentials.Certificate("faceit-2f784-firebase-adminsdk-5z8za-fe87f32d59.json")
-# firebase_admin.initialize_app(cred)
-# db=firestore.client()
 path='training'
 images=[]
 classnames=[]
@@ -68,14 +69,30 @@ def markattendance(name):
          now = datetime.datetime.now()
          dtstring = now.strftime('%H:%M:%S')
          f.writelines(f'\n{name},{dtstring}')
-#          db.collection(f'{todays}').add({f'Name': f'{name}', 'Time': f'{dtstring}'})
+         # db.collection(f'{todays}').add({f'Name': f'{name}', 'Time': f'{dtstring}'})
+
+def markatten(name):
+    todays = datetime.datetime.today().strftime('%d-%m-%y')
+    if not db.collection(f'{todays}').where("Name","==",name).get():
+        now = datetime.datetime.now()
+        dtstring = now.strftime('%H:%M:%S')
+        # doc=db.collection("studentdata").document(name).get()
+        # print(doc.to_dict())
+        db.collection(f'{todays}').document(f'{name}').set({f'Name': f'{name}', 'Time': f'{dtstring}'})
+
+
+
+
+
+
 
 
 app = Flask(__name__)
+
 camera = cv2.VideoCapture(0)
 
-
 def generate_frames():
+    camera = cv2.VideoCapture(0)
     while True:
 
         ## read the camera frame
@@ -104,15 +121,13 @@ def generate_frames():
                     cv2.rectangle(img, (x1, y2 - 35), (x2, y2), (0, 255, 255), cv2.FILLED)
                     cv2.putText(img, name, (x1 + 6, y2 - 6), cv2.FONT_ITALIC, 1, (255, 255, 255), 2)
                     # all the codes written are for format of how the text are displayed in the webcam
-                    markattendance(name)
-
-                ret, buffer = cv2.imencode('.jpg', img)
-                img = buffer.tobytes()
-                yield (b'--frame\r\n'
-                   b'Content-Type: image/jpeg\r\n\r\n' + img + b'\r\n')
-
-
-
+                    markatten(name)
+            cv2.imshow('Webcam face detection from out screen', img)
+            cv2.waitKey(1)
+                # ret, buffer = cv2.imencode('.jpg', img)
+                # img = buffer.tobytes()
+                # yield (b'--frame\r\n'
+                #    b'Content-Type: image/jpeg\r\n\r\n' + img + b'\r\n')
 
 
 
@@ -120,15 +135,44 @@ def generate_frames():
 
 
 
-@app.route('/')
+
+
+
+@app.route('/',methods=['GET','POST'])
 def index():
+    if request.method=='POST':
+        datee=request.form['dates']
+        docs = db.collection(datee).get()
+        name=[]
+        time=[]
+        for d in docs:
+         dd=d.to_dict()
+         name.append(dd['Name'])
+         time.append(dd['Time'])
+        print(name,time)
+        return render_template('second.html',n=name,t=time)
+
+
+    return render_template('second.html')
+
+@app.route('/second')
+def second():
+
     return render_template('hello.html')
 
-
-@app.route('/video')
+@app.route('/video',methods=['GET','POST'])
 def video():
-    return Response(generate_frames(), mimetype='multipart/x-mixed-replace; boundary=frame')
+    # return Response(generate_frames(), mimetype='multipart/x-mixed-replace; boundary=frame')
+
+    if request.form['turn']=='yes':
+            generate_frames()
+            return render_template('hello.html')
+    elif request.form['turn']=='no':
+            camera.release()
+            return render_template('hello.html')
+
 
 
 if __name__ == "__main__":
     app.run(debug=True)
+
